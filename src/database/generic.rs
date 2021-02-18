@@ -1,21 +1,20 @@
-use std::{
-    fmt::{Debug, Display},
-};
-
 use crate::database as db;
 
-pub trait Get<T> {
-    type Key: Debug + Display;
+pub trait Get {
+    type Key: ToString;
 
-    fn get(&self, key: Self::Key) -> Option<&T>;
+    fn get<T>(&self, key: Self::Key) -> Option<&T>;
 
 }
-
-impl<T, V> db::Like for T
+/*
+impl<V, T> db::Like for T
 where
-    T: Get<V>
+    T: Get
 {
     type Key = T::Key;
     type Value = V;
 
+    fn get(&self, key: Self::Key) -> Option<&V> {
+    }
 }
+*/

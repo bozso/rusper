@@ -1,17 +1,24 @@
-use std::{
-    fmt::{Debug, Display},
-};
-
 pub mod generic;
 
 #[derive(thiserror::Error, Debug)]
-pub enum Error<Key: Debug + Display> {
+pub enum Error {
     #[error("no such '{0}' entry found")]
-    NoSuchEntry(Key),
+    NoSuchEntry(String),
 }
 
+impl<'a, K: ToString> From<&'a K> for Error {
+    fn from(key: &'a K) -> Self {
+        Self::NoSuchEntry(key.to_string())
+    }
+}
+
+pub trait Generic<Key, Value> : Like<Key=Key, Value=Value>
+where
+    Key: ToString,
+{}
+
 pub trait Like {
-    type Key: Display + Debug;
+    type Key: ToString;
     type Value;
 
     fn insert(&mut self, key: Self::Key, val: Self::Value);
@@ -23,16 +30,15 @@ pub trait Like {
 
     fn contains(&self, key: &Self::Key) -> bool;
 
-    fn must_get(&self, key: Self::Key) -> Result<&Self::Value, Error<Self::Key>> {
-        self.get(&key).ok_or(Error::NoSuchEntry(key))
+    fn must_get(&self, key: &Self::Key) -> Result<&Self::Value, Error> {
+        self.get(&key).ok_or(key.into())
     }
 
-    fn must_get_mut(&mut self, key: Self::Key) -> Result<&mut Self::Value, Error<Self::Key>> {
-        self.get_mut(&key).ok_or(Error::NoSuchEntry(key))
+    fn must_get_mut(&mut self, key: &Self::Key) -> Result<&mut Self::Value, Error> {
+        self.get_mut(&key).ok_or(key.into())
     }
 
-    fn must_remove(&mut self, key: Self::Key) -> Result<Self::Value, Error<Self::Key>> {
-        self.remove(&key).ok_or(Error::NoSuchEntry(key))
+    fn must_remove(&mut self, key: &Self::Key) -> Result<Self::Value, Error> {
+        self.remove(&key).ok_or(key.into())
     }
 }
-
