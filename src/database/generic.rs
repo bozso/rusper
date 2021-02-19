@@ -1,20 +1,13 @@
-use crate::database as db;
-
+#[cfg(not(feature = "use_hecs"))]
 pub trait Get {
     type Key: ToString;
 
-    fn get<T>(&self, key: Self::Key) -> Option<&T>;
-
+    fn get<T>(&self, key: &Self::Key) -> Option<&T>;
 }
-/*
-impl<V, T> db::Like for T
-where
-    T: Get
-{
-    type Key = T::Key;
-    type Value = V;
 
-    fn get(&self, key: Self::Key) -> Option<&V> {
-    }
+#[cfg(feature = "use_hecs")]
+pub trait Get {
+    type Key: ToString;
+
+    fn get<'a, T: Sync + Send + 'a>(&'a self, key: &Self::Key) -> Option<&'a T>;
 }
-*/

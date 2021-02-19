@@ -1,5 +1,8 @@
 pub mod generic;
 
+#[cfg(feature = "use_hecs")]
+pub mod hecs_adaptor;
+
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("no such '{0}' entry found")]
@@ -11,11 +14,6 @@ impl<'a, K: ToString> From<&'a K> for Error {
         Self::NoSuchEntry(key.to_string())
     }
 }
-
-pub trait Generic<Key, Value> : Like<Key=Key, Value=Value>
-where
-    Key: ToString,
-{}
 
 pub trait Like {
     type Key: ToString;
